@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+file = __FILE__
+if test(?l, file)
+  require "pathname"
+  file = Pathname.new(file).realpath
+end
+
+require "ruby-processing"
+require File.expand_path(File.dirname(file) + "/../lib/dxruby")
+Processing::Runner.execute
