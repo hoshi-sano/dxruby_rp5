@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
 module Processing
   class Runner
+    DXRP5_HELP_MESSAGE = <<-EOS
+  Version: #{DXRubyRP5::VERSION}
+
+  Usage:
+    dxrp5 run path/to/sketch
+
+  Common options:
+    --nojruby:  do not use the installed version of jruby, instead use our vendored
+                jarred one (required for shader sketches, and some others).
+
+  Examples:
+    dxrp5 run my_sketch.rb
+    dxrp5 --nojruby run my_sketch.rb
+
+      EOS
+
+    def show_help
+      puts DXRP5_HELP_MESSAGE
+    end
+
     private
 
     # changed runner path from original.
