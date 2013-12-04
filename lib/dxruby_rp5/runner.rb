@@ -17,6 +17,13 @@ module Processing
 
       EOS
 
+    def show_version
+      puts  <<-EOS
+  Ruby-Processing version #{Processing::VERSION}
+  DXRuby_RP5 version #{DXRubyRP5::VERSION}
+      EOS
+    end
+
     def show_help
       puts DXRP5_HELP_MESSAGE
     end
