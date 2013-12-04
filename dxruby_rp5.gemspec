@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["hoshi.sanou@gmail.com"]
   spec.description   = %q{`dxruby-rp5` is a ruby library for 2D graphics and game. `dxruby-rp5` uses `ruby-processing` and  has API same as DXRuby.}
   spec.summary       = %q{2D graphics and game library}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/hoshi-sano/dxruby_rp5"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
