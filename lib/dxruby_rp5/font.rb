@@ -8,8 +8,18 @@ module DXRubyRP5
 
     def initialize(size, fontname = '', hash = {})
       @size = size
-      # TODO: fontname の変換
-      fontname = "IPAGothic" # あとで消す
+      # TODO: use fontname
+      gothics = PFont.list.grep(/gothic/i)
+      if gothics.any?
+        ipa_gothics = gothics.grep(/ipa/i)
+        if ipa_gothics.any?
+          fontname = ipa_gothics.first
+        else
+          fontname = gothics.first
+        end
+      else
+        fontname = PFont.list.first
+      end
       @native = $app.create_font(fontname, @size)
     end
 
