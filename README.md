@@ -53,7 +53,7 @@ Window.loop do
 end
 ```
 
-`dxrb5` converts the source code as follows.
+`dxrp5` converts the source code as follows.
 
 ```ruby
 class Sketch < Processing::App
