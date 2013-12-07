@@ -122,6 +122,7 @@ module DXRubyRP5
 
     def to_rp5_color(_color)
       if _color.size > 3
+        _color = _color.dup
         _color.push(_color.shift)
       end
       return _color

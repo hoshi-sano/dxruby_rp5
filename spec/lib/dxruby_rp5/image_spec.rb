@@ -219,4 +219,72 @@ describe DXRubyRP5::Image, '画像を表すクラス' do
 
     it { should eq(60) }
   end
+
+  describe '#[]' do
+    let(:image) { described_class.load(fixture_path('image.png')) }
+
+    subject { image[10, 10] }
+
+    context 'formatがRGBの画像を指定した場合' do
+      let(:image) {
+        image = described_class.load(fixture_path('image.png'))
+        image._surface.format = Processing::App::RGB
+        image
+      }
+
+      it { should eq([255, 0, 0]) }
+    end
+
+    context 'formatがARGBの画像を指定した場合' do
+      it { should eq([255, 255, 0, 0]) }
+    end
+  end
+
+  describe '#[]=' do
+    let(:image) { described_class.load(fixture_path('image.png')) }
+    let(:color) { [255, 255, 255, 0] }
+
+    before { image[10, 10] = color }
+
+    subject { image[10, 10] }
+
+    shared_context '#[]=' do
+      context 'RGBの色を指定した場合' do
+        let(:color) { [255, 255, 0] }
+
+        it { should eq(expect_color) }
+
+        it '引数の色を直接操作しない' do
+          color.should eq([255, 255, 0])
+        end
+      end
+
+      context 'ARGBの色を指定した場合' do
+        let(:color) { [255, 255, 255, 0] }
+
+        it { should eq(expect_color) }
+
+        it '引数の色を直接操作しない' do
+          color.should eq([255, 255, 255, 0])
+        end
+      end
+    end
+
+    context 'formatがRGBの画像に' do
+      let(:image) {
+        image = described_class.load(fixture_path('image.png'))
+        image._surface.format = Processing::App::RGB
+        image
+      }
+      let(:expect_color) { [255, 255, 0] }
+
+      include_context '#[]='
+    end
+
+    context 'formatがARGBの画像を指定した場合' do
+      let(:expect_color) { [255, 255, 255, 0] }
+
+      include_context '#[]='
+    end
+  end
 end
