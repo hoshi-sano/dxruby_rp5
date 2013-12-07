@@ -191,4 +191,32 @@ describe DXRubyRP5::Image, '画像を表すクラス' do
       end
     end
   end
+
+  shared_context '#width #height' do
+    let(:image) { described_class.new(100, 60) }
+    let(:rp5_pimage) {
+      s = double('_surface')
+      allow(s).to receive(:width).and_return(100)
+      allow(s).to receive(:height).and_return(60)
+      image.instance_variable_set(:@_surface, s)
+      s
+    }
+  end
+
+  describe '#width' do
+
+    subject { image.width }
+
+    include_context '#width #height'
+
+    it { should eq(100) }
+  end
+
+  describe '#height' do
+    subject { image.height }
+
+    include_context '#width #height'
+
+    it { should eq(60) }
+  end
 end
