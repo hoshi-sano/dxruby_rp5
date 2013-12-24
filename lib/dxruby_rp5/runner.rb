@@ -19,7 +19,7 @@ module Processing
 
     def show_version
       puts  <<-EOS
-  Ruby-Processing version #{Processing::VERSION}
+  Ruby-Processing version #{RubyProcessing::VERSION}
   DXRuby_RP5 version #{DXRubyRP5::VERSION}
       EOS
     end

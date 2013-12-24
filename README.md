@@ -22,6 +22,10 @@ Add this line to your application's Gemfile:
 
     gem 'dxruby_rp5'
 
+If your ruby-processing version is lower than 2.4.0 (ex. 2.3.x):
+
+    gem 'dxruby_rp5', '0.0.2'
+
 And then execute:
 
     $ bundle
@@ -29,6 +33,10 @@ And then execute:
 Or install it yourself as:
 
     $ gem install dxruby_rp5
+
+If your ruby-processing version is lower than 2.4.0 (ex. 2.3.x):
+
+    $ gem install dxruby_rp5 -v 0.0.2
 
 ## Usage
 
