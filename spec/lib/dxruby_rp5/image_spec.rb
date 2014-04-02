@@ -118,6 +118,24 @@ describe DXRubyRP5::Image, '画像を表すクラス' do
     end
   end
 
+  # Sketch#run しないと内部で使用している #create_graphics がエラーにな
+  # るためテストできない
+  # TODO: テスト方法を見出す
+  describe '#line' do
+    let(:image) { described_class.new(2, 2) }
+    let(:color) { [255, 255, 255] }
+
+    subject { image.line(x1, y1, x2, y2, color) }
+  end
+
+  # 以下、同上
+  describe '#box' do;  end
+  describe '#box_fill' do;  end
+  describe '#circle' do;  end
+  describe '#circle_fill' do;  end
+  describe '#triangle' do;  end
+  describe '#triangle_fill' do;  end
+
   describe '#slice' do
     let(:image) { described_class.load(fixture_path('image.png')) }
 

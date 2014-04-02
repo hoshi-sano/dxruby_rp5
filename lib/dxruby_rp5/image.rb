@@ -87,6 +87,37 @@ module DXRubyRP5
       return c[0..max] == _color
     end
 
+    def line(x1, y1, x2, y2, _color)
+      _color = to_rp5_color(_color)
+      draw_on_image(_color, false) do |pg|
+        pg.line(x1, y1, x2, y2)
+      end
+    end
+
+    def box(x1, y1, x2, y2, _color)
+      rect(x1, y1, x2, y2, _color)
+    end
+
+    def box_fill(x1, y1, x2, y2, _color)
+      rect(x1, y1, x2, y2, _color, true)
+    end
+
+    def circle(x, y, r, _color)
+      ellipse(x, y, 2*r, 2*r, _color)
+    end
+
+    def circle_fill(x, y, r, _color)
+      ellipse(x, y, 2*r, 2*r, _color, true)
+    end
+
+    def triangle(x1, y1, x2, y2, x3, y3, _color)
+      _triangle(x1, y1, x2, y2, x3, y3, _color)
+    end
+
+    def triangle_fill(x1, y1, x2, y2, x3, y3, _color)
+      _triangle(x1, y1, x2, y2, x3, y3, _color, true)
+    end
+
     def slice(x, y, width, height)
       image = self.class.new(0, 0)
       s = $app.create_image(width, height, Processing::App::ARGB)
@@ -113,6 +144,9 @@ module DXRubyRP5
       alias_method :load_to_array, :load_tiles
       alias_method :loadToArray, :load_to_array
     end
+    alias_method :boxFill, :box_fill
+    alias_method :circleFill, :circle_fill
+    alias_method :triangleFill, :triangle_fill
     alias_method :setColorKey, :set_color_key
     alias_method :sliceTiles, :slice_tiles
     alias_method :slice_to_array, :slice_tiles
@@ -142,6 +176,43 @@ module DXRubyRP5
 
     def blue(rgb)
       return rgb & 0xFF
+    end
+
+    # TODO: simplify
+    def draw_on_image(rp5_color, fill)
+      w, h = @_surface.width, @_surface.height
+      pg = $app.create_graphics(w, h)
+      pg.begin_draw
+      pg.image(@_surface, 0, 0)
+      pg.push_matrix
+      pg.stroke(*rp5_color)
+      fill ? pg.fill(*rp5_color) : pg.no_fill
+      yield(pg)
+      pg.pop_matrix
+      pg.end_draw
+      @_surface.copy(pg, 0, 0, w, h, 0, 0, w, h)
+      return self
+    end
+
+    def rect(x1, y1, x2, y2, _color, fill=false)
+      _color = to_rp5_color(_color)
+      draw_on_image(_color, fill) do |pg|
+        pg.rect(x1, y1, x2, y2)
+      end
+    end
+
+    def ellipse(x, y, width, heigth, _color, fill=false)
+      _color = to_rp5_color(_color)
+      draw_on_image(_color, fill) do |pg|
+        pg.ellipse(x, y, width, height)
+      end
+    end
+
+    def _triangle(x1, y1, x2, y2, x3, y3, _color, fill=false)
+      _color = to_rp5_color(_color)
+      draw_on_image(_color, fill) do |pg|
+        pg.triangle(x1, y1, x2, y2, x3, y3)
+      end
     end
   end
 end
