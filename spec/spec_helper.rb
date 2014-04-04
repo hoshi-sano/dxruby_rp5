@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'dxruby'
-require 'dxruby_rp5'
+require 'ruby-processing'
 
 # redefine Processing::App#initialize so that dose not run sketch.
 class Processing::App
@@ -41,3 +40,6 @@ sketch_path = File.expand_path('fixtures/test_sketch.rb', File.dirname(__FILE__)
 require sketch_path
 
 Processing::App.const_set(:SKETCH_PATH, sketch_path)
+
+require 'dxruby'
+require 'dxruby_rp5'

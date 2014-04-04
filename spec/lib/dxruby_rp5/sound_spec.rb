@@ -4,15 +4,20 @@ require 'spec_helper'
 describe DXRubyRP5::Sound, '音を表すクラス' do
   describe '.new' do
     shared_context '.new' do
-      subject { described_class.new(fixture_path(filename)) }
+      before(:each) do
+        m = Java::DdfMinim::Minim.new($app)
+        Java::DdfMinim::Minim.should_receive(:new).with($app).once.and_return(m)
+      end
+
+      subject { described_class.new(path) }
 
       it '呼び出すことができる' do
-        subject
+        expect { subject }.to_not raise_error
       end
     end
 
     context 'WAVE形式のファイルの場合' do
-      let(:filename) { 'sound.wav' }
+      let(:path) { fixture_path('sound.wav') }
 
       include_context '.new'
     end
@@ -25,26 +30,26 @@ describe DXRubyRP5::Sound, '音を表すクラス' do
   end
 
   describe '#play' do
-    context 'WAVE形式のファイルの場合' do
-      let(:path) { fixture_path('sound.wav') }
-      let(:sound) { described_class.new(path) }
+    shared_context '#play' do
+      let(:sound) do
+        sound = described_class.new(path)
+        audio_player = sound.instance_variable_get(:@_sound)
+        audio_player.should_receive(:play).once
+        audio_player.should_receive(:rewind).once
+        sound
+      end
 
       subject { sound.play }
 
-      it '呼び出すことができる' do
-        subject
-      end
+      it { should eq(sound) }
+    end
+
+    context 'WAVE形式のファイルの場合' do
+      let(:path) { fixture_path('sound.wav') }
     end
 
     # context 'MIDI形式のファイルの場合' do
     #   let(:path) { fixture_path('bgm.mid') }
-    #   let(:sound) { DXRubySDL::Sound.new(path) }
-    #
-    #   subject { sound.play }
-    #
-    #   it '呼び出すことができる' do
-    #     subject
-    #   end
     # end
   end
 end
