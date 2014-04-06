@@ -185,9 +185,19 @@ module DXRubyRP5
       pg.begin_draw
       pg.image(@_surface, 0, 0)
       pg.push_matrix
-      pg.stroke(*rp5_color)
-      fill ? pg.fill(*rp5_color) : pg.no_fill
-      yield(pg)
+      if fill
+        pg.no_stroke
+        pg.fill(*rp5_color)
+        calibration = 0
+      else
+        # processingの仕様でstrokeでは描画する図形の右端・下端の外側に
+        # 線を引くため、指定した幅と高さに収まるよう、線の太さ(-1)分の
+        # 補正値をかける
+        pg.stroke(*rp5_color)
+        pg.no_fill
+        calibration = -1
+      end
+      yield(pg, calibration)
       pg.pop_matrix
       pg.end_draw
       @_surface.copy(pg, 0, 0, w, h, 0, 0, w, h)
@@ -196,21 +206,24 @@ module DXRubyRP5
 
     def rect(x1, y1, x2, y2, _color, fill=false)
       _color = to_rp5_color(_color)
-      draw_on_image(_color, fill) do |pg|
-        pg.rect(x1, y1, x2, y2)
+      rect_w = x2 - x1
+      rect_h = y2 - y1
+      draw_on_image(_color, fill) do |pg, c|
+        pg.rect(x1, y1, rect_w + c, rect_h + c)
       end
     end
 
     def ellipse(x, y, width, heigth, _color, fill=false)
       _color = to_rp5_color(_color)
-      draw_on_image(_color, fill) do |pg|
-        pg.ellipse(x, y, width, height)
+      draw_on_image(_color, fill) do |pg, c|
+        pg.ellipse(x, y, width + c, height + c)
       end
     end
 
     def _triangle(x1, y1, x2, y2, x3, y3, _color, fill=false)
       _color = to_rp5_color(_color)
-      draw_on_image(_color, fill) do |pg|
+      draw_on_image(_color, fill) do |pg, c|
+        # TODO: use calibration
         pg.triangle(x1, y1, x2, y2, x3, y3)
       end
     end
