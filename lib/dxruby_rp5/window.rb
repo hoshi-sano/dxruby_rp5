@@ -100,8 +100,12 @@ module DXRubyRP5
       end
 
       proc = lambda do
+        $app.push_matrix
         $app.text_size(font.size)
         $app.text_font(font.native)
+        # DXRubyでは文字の配置指定はできないため、都度text_alignを指定
+        # せず固定で良いかもしれない
+        $app.text_align(Processing::App::LEFT, Processing::App::TOP)
         $app.fill(color)
         string.lines.each.with_index do |line, i|
           line.chomp!
@@ -110,6 +114,7 @@ module DXRubyRP5
           end
           $app.text(string, x, y)
         end
+        $app.pop_matrix
       end
 
       if @use_window_loop
