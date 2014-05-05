@@ -63,7 +63,7 @@ describe DXRubyRP5::RenderTarget do
     context '色の指定をしない場合' do
       subject { described_class.new(width, height) }
 
-      its(:bgcolor) { should eq([0, 0, 0, 0]) }
+      its(:bgcolor) { should eq([0, 255, 255, 255]) }
     end
 
     context '色の指定を RGB でする場合' do

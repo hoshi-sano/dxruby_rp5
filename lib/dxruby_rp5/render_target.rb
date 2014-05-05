@@ -4,7 +4,7 @@ module DXRubyRP5
     attr_reader :bgcolor
     attr_reader :_surface
 
-    def initialize(width, height, _bgcolor = [0, 0, 0, 0])
+    def initialize(width, height, _bgcolor = [0, 255, 255, 255])
       _bgcolor = to_rp5_color(_bgcolor)
       @bgcolor = $app.color(*_bgcolor)
       @_surface = $app.create_graphics(width, height)
