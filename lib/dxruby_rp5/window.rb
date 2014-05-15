@@ -29,6 +29,14 @@ module DXRubyRP5
       $app.frame.set_title(val)
     end
 
+    def fps
+      $app.frame_rate
+    end
+
+    def fps=(val)
+      $app.frame_rate(val)
+    end
+
     def get_load
       # TODO:
       return 0
