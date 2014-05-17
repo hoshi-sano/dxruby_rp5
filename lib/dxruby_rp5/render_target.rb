@@ -47,6 +47,41 @@ module DXRubyRP5
       @queue << draw_task
     end
 
+    def draw_font(x, y, string, font, hash = {})
+      if string.empty?
+        return
+      end
+      if hash[:color]
+        color = $app.color(*hash[:color])
+      else
+        color = $app.color(255)
+      end
+
+      proc = lambda do
+        @_surface.push_matrix
+        @_surface.text_size(font.size)
+        @_surface.text_font(font.native)
+        # DXRubyでは文字の配置指定はできないため、都度text_alignを指定
+        # せず固定で良いかもしれない
+        @_surface.text_align(Processing::App::LEFT, Processing::App::TOP)
+        @_surface.fill(color)
+        string.lines.each.with_index do |line, i|
+          line.chomp!
+          if line.empty?
+            next
+          end
+          @_surface.text(string, x, y)
+        end
+        @_surface.pop_matrix
+      end
+
+      draw_task = {
+        :proc => proc,
+        :z => hash[:z] || 0,
+      }
+      @queue << draw_task
+    end
+
     def draw_tile(basex, basey, map, image_arr, startx, starty, sizex, sizey, z = 0)
       image_arr = image_arr.flatten
       first_img = image_arr[0]
@@ -87,6 +122,9 @@ module DXRubyRP5
         y += h
       end
     end
+
+    alias_method :drawFont, :draw_font
+    alias_method :drawTile, :draw_tile
 
     private
 
