@@ -244,6 +244,8 @@ if RUBY_ENGINE == "jruby"
   require_relative 'dxruby_rp5/sound_effect'
   require_relative 'dxruby_rp5/render_target'
 
-  Processing::App.sketch_class.load_library :minim
-  Processing::App.sketch_class.class_eval { import 'ddf.minim' }
+  Processing::App.sketch_class.class_eval do
+    load_library :minim
+    import 'ddf.minim'
+  end
 end
