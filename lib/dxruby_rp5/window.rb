@@ -48,6 +48,7 @@ module DXRubyRP5
         block.call
         Window.send(:exec_draw_tasks)
         Input.send(:handle_key_events)
+        Input.send(:handle_pad_events)
       end
 
       Processing::App.sketch_class.class_eval { define_method(:draw, proc) }

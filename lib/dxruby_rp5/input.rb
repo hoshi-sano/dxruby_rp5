@@ -21,11 +21,12 @@ module DXRubyRP5
       else
         cond = lambda { |key| rp5_key_press?(key) }
       end
+      pad_val = rp5_pad_slider_value(:x)
 
-      if cond.call(Processing::App::LEFT)
+      if cond.call(Processing::App::LEFT) || pad_val < 0
         res -= 1
       end
-      if cond.call(Processing::App::RIGHT)
+      if cond.call(Processing::App::RIGHT) || pad_val > 0
         res += 1
       end
       return res
@@ -39,11 +40,12 @@ module DXRubyRP5
       else
         cond = lambda { |key| rp5_key_press?(key) }
       end
+      pad_val = rp5_pad_slider_value(:y)
 
-      if cond.call(Processing::App::UP)
+      if cond.call(Processing::App::UP) || pad_val < 0
         res -= 1
       end
-      if cond.call(Processing::App::DOWN)
+      if cond.call(Processing::App::DOWN) || pad_val > 0
         res += 1
       end
       return res
@@ -74,22 +76,22 @@ module DXRubyRP5
     end
 
     def mouse_down?(button)
-      if @pressed_buttons
-        return @pressed_buttons.include?(button)
+      if @pressed_mbuttons
+        return @pressed_mbuttons.include?(button)
       else
         return rp5_mouse_down?(button)
       end
     end
 
     def mouse_push?(button)
-      if @pushed_buttons
-        return @pushed_buttons.include?(button)
+      if @pushed_mbuttons
+        return @pushed_mbuttons.include?(button)
       else
         return rp5_mouse_down?(button)
       end
     end
 
-    # TODO: support joystick
+    # TODO: support pad_number
     def pad_down?(button_code, pad_number = 0)
       if button_code == P_BUTTON0 && key_down?(K_Z) ||
           button_code == P_BUTTON1 && key_down?(K_X) ||
@@ -97,13 +99,14 @@ module DXRubyRP5
           button_code == P_LEFT && key_down?(K_LEFT) ||
           button_code == P_RIGHT && key_down?(K_RIGHT) ||
           button_code == P_UP && key_down?(K_UP) ||
-          button_code == P_DOWN && key_down?(K_DOWN)
+          button_code == P_DOWN && key_down?(K_DOWN) ||
+          rp5_pad_pressed?(button_code)
         return true
       end
       return false
     end
 
-    # TODO: support joystick
+    # TODO: support pad_number
     def pad_push?(button_code, pad_number = 0)
       if button_code == P_BUTTON0 && key_push?(K_Z) ||
           button_code == P_BUTTON1 && key_push?(K_X) ||
@@ -111,7 +114,8 @@ module DXRubyRP5
           button_code == P_LEFT && key_push?(K_LEFT) ||
           button_code == P_RIGHT && key_push?(K_RIGHT) ||
           button_code == P_UP && key_push?(K_UP) ||
-          button_code == P_DOWN && key_push?(K_DOWN)
+          button_code == P_DOWN && key_push?(K_DOWN) ||
+          rp5_pad_pushed?(button_code)
         return true
       end
       return false
@@ -223,6 +227,21 @@ module DXRubyRP5
         return rp5_button == pressed_button
       end
 
+      def rp5_pad_slider_value(dir)
+        return 0 if !@pad_sliders
+        @pad_sliders[dir].value
+      end
+
+      def rp5_pad_pushed?(button_code)
+        @pushed_pbuttons ||= []
+        @pushed_pbuttons.include?(button_code)
+      end
+
+      def rp5_pad_pressed?(button_code)
+        @pressed_pbuttons ||= []
+        @pressed_pbuttons.include?(button_code)
+      end
+
       def to_rp5_key(key_code)
         return RP5_KEY_TABLE[key_code]
       end
@@ -274,27 +293,27 @@ module DXRubyRP5
       end
 
       def mouse_pressed(button)
-        @pressed_buttons ||= []
+        @pressed_mbuttons ||= []
         rp5_button = JAVA_RP5_MBUTTON_TABLE[button]
         dbutton = to_dxruby_button(rp5_button)
-        @pressed_buttons << dbutton
+        @pressed_mbuttons << dbutton
       end
 
       def mouse_pushed(button)
-        @pushed_buttons ||= []
-        @checked_buttons ||= []
+        @pushed_mbuttons ||= []
+        @checked_mbuttons ||= []
         rp5_button = JAVA_RP5_MBUTTON_TABLE[button]
         dbutton = to_dxruby_button(rp5_button)
-        return if @checked_buttons.include?(dbutton)
-        @pushed_buttons << dbutton
+        return if @checked_mbuttons.include?(dbutton)
+        @pushed_mbuttons << dbutton
       end
 
       def mouse_released(button)
-        return if @pressed_buttons.nil?
+        return if @pressed_mbuttons.nil?
         rp5_button = JAVA_RP5_MBUTTON_TABLE[button]
         dbutton = to_dxruby_button(rp5_button)
-        @pressed_buttons.delete(dbutton)
-        @checked_buttons.delete(dbutton)
+        @pressed_mbuttons.delete(dbutton)
+        @checked_mbuttons.delete(dbutton)
       end
 
       def handle_key_events
@@ -310,10 +329,133 @@ module DXRubyRP5
           @checked_keys -= @pressed_keys
         end
 
-        return if @pushed_buttons.nil?
-        @checked_buttons = (@checked_buttons || @pushed_buttons)
-        @pushed_buttons.clear
+        return if @pushed_mbuttons.nil?
+        @checked_mbuttons = (@checked_mbuttons || @pushed_mbuttons)
+        @pushed_mbuttons.clear
+      end
+
+      PSLIDER_DIRS = {
+        x: [DXRubyRP5.const_get(:P_RIGHT),
+            DXRubyRP5.const_get(:P_LEFT)],
+        y: [DXRubyRP5.const_get(:P_DOWN),
+            DXRubyRP5.const_get(:P_UP)],
+      }
+
+      def handle_pad_events
+        return if @pad_sliders.nil? || @pad_buttons.nil?
+        @pad_buttons.each do |key, button|
+          if button.pressed
+            pbutton_pressed(key)
+          else
+            pbutton_released(key)
+          end
+        end
+
+        @pad_sliders.each do |symbol, slider|
+          val = slider.value
+          if val > 0
+            pbutton_pressed(PSLIDER_DIRS[symbol][0])
+          elsif val < 0
+            pbutton_pressed(PSLIDER_DIRS[symbol][1])
+          else
+            pbutton_released(PSLIDER_DIRS[symbol][0])
+            pbutton_released(PSLIDER_DIRS[symbol][1])
+          end
+        end
+      end
+
+      def pbutton_pressed(key)
+        if @pushed_pbuttons.include?(key)
+          @pushed_pbuttons.delete(key)
+        else
+          if !@pressed_pbuttons.include?(key)
+            @pushed_pbuttons << key
+            @pressed_pbuttons << key
+          end
+        end
+      end
+
+      def pbutton_released(key)
+        @pushed_pbuttons.delete(key)
+        @pressed_pbuttons.delete(key)
+      end
+
+      def load_gcp_native_libraries
+        sketch_class = Processing::App.sketch_class
+        lib_loader = sketch_class.class_variable_get(:@@library_loader)
+        gcp_library_path =
+          lib_loader.send(:get_library_directory_path, "GameControlPlus")
+        java.lang.System.setProperty("java.library.path", gcp_library_path)
+        loader = java.lang.Class.for_name("java.lang.ClassLoader")
+        field = loader.get_declared_field("sys_paths")
+        if field
+          field.accessible = true
+          loader = java.lang.Class.for_name("java.lang.System").get_class_loader
+          field.set(loader, nil)
+        end
+      end
+
+      def setup_pad_input(device)
+        @pad_buttons = {}
+        @pad_sliders = {}
+        dummy_slider = Object.new
+        dummy_slider.instance_eval {|obj| def value; 0; end }
+        dummy_button = Object.new
+        dummy_button.instance_eval {|obj| def pressed; false; end }
+
+        # get sliders
+        [:x, :y].each do |name|
+          if device
+            device.get_number_of_sliders.times do |i|
+              slider = device.get_slider(i)
+              key = slider.name.to_sym
+              @pad_sliders[name] = slider if key == name
+            end
+          end
+          @pad_sliders[name] ||= dummy_slider
+        end
+
+        # get buttons
+        (0..15).each do |idx|
+          key = DXRubyRP5.const_get("P_BUTTON#{idx}")
+          begin
+            button = device ? device.get_button(idx) : dummy_button
+          rescue Java::JavaLang::IndexOutOfBoundsException => e
+            button = dummy_button
+          end
+          @pad_buttons[key] = button
+        end
+        @pushed_pbuttons = []
+        @pressed_pbuttons = []
       end
     end
+
+    # for gamepad/joystick
+    begin
+      device = nil
+      Processing::App.sketch_class.class_eval do
+        load_library :GameControlPlus
+      end
+    rescue LoadError => e
+      puts "WARN: Couldn't load library for gamepad/joystick"
+      puts "If you want to use gamepad or joystick, " \
+           "add 'GameControlPlus' library via PDE."
+    else
+      import "org.gamecontrolplus.ControlIO"
+      load_gcp_native_libraries
+      begin
+        list = ControlIO.get_instance($app).get_devices
+        device_types = [
+                        Java::NetJavaGamesInput::Controller::Type::STICK,
+                        Java::NetJavaGamesInput::Controller::Type::FINGERSTICK,
+                        Java::NetJavaGamesInput::Controller::Type::GAMEPAD,
+                       ].map(&:to_string)
+        device = list.find {|dev| device_types.include?(dev.get_type_name) }
+        device.open if device
+      rescue Java::JavaLang::NullPointerException
+        # cannot get devices when running spec
+      end
+    end
+    setup_pad_input(device)
   end
 end
