@@ -65,13 +65,7 @@ module DXRubyRP5
         # せず固定で良いかもしれない
         @_surface.text_align(Processing::App::LEFT, Processing::App::TOP)
         @_surface.fill(color)
-        string.lines.each.with_index do |line, i|
-          line.chomp!
-          if line.empty?
-            next
-          end
-          @_surface.text(string, x, y)
-        end
+        @_surface.text(string, x, y)
         @_surface.pop_matrix
       end
 

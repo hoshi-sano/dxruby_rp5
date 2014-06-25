@@ -116,13 +116,7 @@ module DXRubyRP5
         # せず固定で良いかもしれない
         $app.text_align(Processing::App::LEFT, Processing::App::TOP)
         $app.fill(color)
-        string.lines.each.with_index do |line, i|
-          line.chomp!
-          if line.empty?
-            next
-          end
-          $app.text(string, x, y)
-        end
+        $app.text(string, x, y)
         $app.pop_matrix
       end
 
